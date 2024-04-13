@@ -303,18 +303,191 @@ hxd_App.prototype = {
 	,__class__: hxd_App
 };
 var Main = function() {
+	this.hity = false;
+	this.hitx = false;
+	this.time = Main.maxTime;
+	this.score = 0;
 	hxd_App.call(this);
 };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
 Main.main = function() {
+	hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("oy6:imagesoy10:hxlogo.pngty15:images-here.txttgy6:audiosoy15:audios-here.txttgy7:localesoy16:locales-here.txttgy4:dataoy13:data-here.txttgg"))));
 	new Main();
 };
 Main.__super__ = hxd_App;
 Main.prototype = $extend(hxd_App.prototype,{
 	init: function() {
-		var tf = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
-		tf.set_text("Hello World !");
+		this.debugTxt = new h2d_Text(hxd_res_DefaultFont.get());
+		var _this = this.debugTxt;
+		_this.posChanged = true;
+		_this.scaleX *= 5;
+		_this.posChanged = true;
+		_this.scaleY *= 5;
+		this.debugTxt.set_text("Score: 0");
+		var fh = this.debugTxt;
+		fh.set_text(fh.text + "\nTime: 0");
+		this.obj = new h2d_Object(this.s2d);
+		var _this = this.obj;
+		_this.posChanged = true;
+		_this.x = 600;
+		var _this = this.obj;
+		_this.posChanged = true;
+		_this.y = 600;
+		this.obj.alpha = 0.6;
+		var tile = hxd_Res.get_loader().loadCache("images/hxlogo.png",hxd_res_Image).toTile();
+		tile = tile.center();
+		var mybitmap = new h2d_Bitmap(tile,this.obj);
+		this.s2d.addChild(this.debugTxt);
+	}
+	,update: function(dt) {
+		if(this.score >= 50) {
+			if(this.obj.x > 980) {
+				this.hitx = true;
+			}
+			if(this.obj.x < 150) {
+				this.hitx = false;
+			}
+			if(this.obj.y > 780) {
+				this.hity = true;
+			}
+			if(this.obj.y < 10) {
+				this.hity = false;
+			}
+		}
+		if(this.score >= 50) {
+			var hitSHIT = 20;
+			this.debugTxt.set_textColor(16711680);
+			var fh = this.obj;
+			fh.posChanged = true;
+			fh.x += this.score / hitSHIT * (this.hitx ? 1 : -1);
+			var fh = this.obj;
+			fh.posChanged = true;
+			fh.y += this.score / hitSHIT * (this.hity ? 1 : -1);
+		} else {
+			this.debugTxt.set_textColor(16777215);
+			this.hitx = false;
+			this.hity = false;
+		}
+		var w = 300;
+		var h = 300;
+		var rotation = this.obj.rotation;
+		if(w < h) {
+			var tmp = w;
+			w = h;
+			h = tmp;
+			rotation += Math.PI / 2;
+		}
+		var hseg = (w - h) * 0.5;
+		var dx = hseg * Math.cos(rotation);
+		var dy = hseg * Math.sin(rotation);
+		var shit_x = this.obj.x - dx;
+		var shit_y = this.obj.y - dy;
+		var shit_dx = dx * 2;
+		var shit_dy = dy * 2;
+		var shit_ray = h * 0.5;
+		var shit_lenSq = shit_dx * shit_dx + shit_dy * shit_dy;
+		var shit_invLenSq = shit_lenSq < 1e-20 ? 0 : 1 / shit_lenSq;
+		var x = this.s2d.get_mouseX();
+		var y = this.s2d.get_mouseY();
+		if(y == null) {
+			y = 0.;
+		}
+		if(x == null) {
+			x = 0.;
+		}
+		var x1 = x;
+		var y1 = y;
+		if(y1 == null) {
+			y1 = 0.;
+		}
+		if(x1 == null) {
+			x1 = 0.;
+		}
+		var mousething_x = x1;
+		var mousething_y = y1;
+		this.time--;
+		var px = mousething_x - shit_x;
+		var py = mousething_y - shit_y;
+		var t = px * shit_dx + py * shit_dy;
+		var tmp;
+		if(t < 0) {
+			tmp = px * px + py * py;
+		} else if(t > shit_lenSq) {
+			var kx = mousething_x - (shit_x + shit_dx);
+			var ky = mousething_y - (shit_y + shit_dy);
+			tmp = kx * kx + ky * ky;
+		} else {
+			var tl2 = t * shit_invLenSq;
+			var pdx = shit_x + tl2 * shit_dx - mousething_x;
+			var pdy = shit_y + tl2 * shit_dy - mousething_y;
+			tmp = pdx * pdx + pdy * pdy;
+		}
+		if(tmp - shit_ray * shit_ray < 0) {
+			this.obj.alpha = 1;
+			if(hxd_Key.isReleased(0)) {
+				this.score++;
+				var _this = this.obj;
+				_this.posChanged = true;
+				_this.scaleX = 1.5;
+				_this.posChanged = true;
+				_this.scaleY = 1.5;
+				var _this = this.obj;
+				var max = 980;
+				if(max == null) {
+					max = 1.0;
+				}
+				var v = Math.random() * max;
+				_this.posChanged = true;
+				_this.x = v;
+				var _this = this.obj;
+				var max = 780;
+				if(max == null) {
+					max = 1.0;
+				}
+				var v = Math.random() * max;
+				_this.posChanged = true;
+				_this.y = v;
+				this.time = Main.maxTime;
+			}
+		} else {
+			this.obj.alpha = 0.6;
+		}
+		if(this.score >= 50) {
+			if(this.obj.x > 980) {
+				this.hitx = true;
+			}
+			if(this.obj.x < 150) {
+				this.hitx = false;
+			}
+			if(this.obj.y > 780) {
+				this.hity = true;
+			}
+			if(this.obj.y < 10) {
+				this.hity = false;
+			}
+		}
+		if(this.obj.scaleX != 1) {
+			var _this = this.obj;
+			var a = this.obj.scaleX;
+			var v = a + 0.2 * (1 - a);
+			_this.posChanged = true;
+			_this.scaleX = v;
+			_this.posChanged = true;
+			_this.scaleY = v;
+		}
+		if(this.time < 0) {
+			this.score = Math.floor(this.score / 1.5);
+			Main.maxTime = Math.floor(Main.maxTime / 1.2);
+			this.time = Main.maxTime;
+		}
+		this.debugTxt.set_text("Score: " + this.score);
+		var fh = this.debugTxt;
+		fh.set_text(fh.text + ("\nTime: " + this.time));
+		var fh = this.debugTxt;
+		fh.set_text(fh.text + ("\nx: " + this.obj.x + Std.string(this.hitx)));
+		var fh = this.debugTxt;
+		fh.set_text(fh.text + ("\ny: " + this.obj.y + Std.string(this.hity)));
 	}
 	,__class__: Main
 });
@@ -15750,6 +15923,134 @@ h2d_col_Ray.prototype = {
 	}
 	,__class__: h2d_col_Ray
 };
+var h2d_col_RoundRect = function(x,y,w,h,rotation) {
+	if(w < h) {
+		var tmp = w;
+		w = h;
+		h = tmp;
+		rotation += Math.PI / 2;
+	}
+	var hseg = (w - h) * 0.5;
+	var dx = hseg * Math.cos(rotation);
+	var dy = hseg * Math.sin(rotation);
+	this.x = x - dx;
+	this.y = y - dy;
+	this.dx = dx * 2;
+	this.dy = dy * 2;
+	this.ray = h * 0.5;
+	this.lenSq = this.dx * this.dx + this.dy * this.dy;
+	this.invLenSq = this.lenSq < 1e-20 ? 0 : 1 / this.lenSq;
+};
+$hxClasses["h2d.col.RoundRect"] = h2d_col_RoundRect;
+h2d_col_RoundRect.__name__ = "h2d.col.RoundRect";
+h2d_col_RoundRect.__super__ = h2d_col_Collider;
+h2d_col_RoundRect.prototype = $extend(h2d_col_Collider.prototype,{
+	distanceCenterSq: function(p) {
+		var px = p.x - this.x;
+		var py = p.y - this.y;
+		var t = px * this.dx + py * this.dy;
+		if(t < 0) {
+			return px * px + py * py;
+		} else if(t > this.lenSq) {
+			var kx = p.x - (this.x + this.dx);
+			var ky = p.y - (this.y + this.dy);
+			return kx * kx + ky * ky;
+		} else {
+			var tl2 = t * this.invLenSq;
+			var pdx = this.x + tl2 * this.dx - p.x;
+			var pdy = this.y + tl2 * this.dy - p.y;
+			return pdx * pdx + pdy * pdy;
+		}
+	}
+	,inside: function(p) {
+		var px = p.x - this.x;
+		var py = p.y - this.y;
+		var t = px * this.dx + py * this.dy;
+		var tmp;
+		if(t < 0) {
+			tmp = px * px + py * py;
+		} else if(t > this.lenSq) {
+			var kx = p.x - (this.x + this.dx);
+			var ky = p.y - (this.y + this.dy);
+			tmp = kx * kx + ky * ky;
+		} else {
+			var tl2 = t * this.invLenSq;
+			var pdx = this.x + tl2 * this.dx - p.x;
+			var pdy = this.y + tl2 * this.dy - p.y;
+			tmp = pdx * pdx + pdy * pdy;
+		}
+		return tmp - this.ray * this.ray < 0;
+	}
+	,distance: function(p) {
+		var px = p.x - this.x;
+		var py = p.y - this.y;
+		var t = px * this.dx + py * this.dy;
+		var tmp;
+		if(t < 0) {
+			tmp = px * px + py * py;
+		} else if(t > this.lenSq) {
+			var kx = p.x - (this.x + this.dx);
+			var ky = p.y - (this.y + this.dy);
+			tmp = kx * kx + ky * ky;
+		} else {
+			var tl2 = t * this.invLenSq;
+			var pdx = this.x + tl2 * this.dx - p.x;
+			var pdy = this.y + tl2 * this.dy - p.y;
+			tmp = pdx * pdx + pdy * pdy;
+		}
+		return Math.sqrt(tmp) - this.ray;
+	}
+	,getNormalAt: function(p) {
+		var px = p.x - this.x;
+		var py = p.y - this.y;
+		var t = px * this.dx + py * this.dy;
+		if(!(t < 0)) {
+			if(t > this.lenSq) {
+				px = p.x - (this.x + this.dx);
+				py = p.y - (this.y + this.dy);
+			} else {
+				var tl2 = t * this.invLenSq;
+				px = -(this.x + tl2 * this.dx - p.x);
+				py = -(this.y + tl2 * this.dy - p.y);
+			}
+		}
+		var x = px;
+		var y = py;
+		if(y == null) {
+			y = 0.;
+		}
+		if(x == null) {
+			x = 0.;
+		}
+		return new h2d_col_PointImpl(x,y);
+	}
+	,contains: function(p) {
+		var px = p.x - this.x;
+		var py = p.y - this.y;
+		var t = px * this.dx + py * this.dy;
+		var tmp;
+		if(t < 0) {
+			tmp = px * px + py * py;
+		} else if(t > this.lenSq) {
+			var kx = p.x - (this.x + this.dx);
+			var ky = p.y - (this.y + this.dy);
+			tmp = kx * kx + ky * ky;
+		} else {
+			var tl2 = t * this.invLenSq;
+			var pdx = this.x + tl2 * this.dx - p.x;
+			var pdy = this.y + tl2 * this.dy - p.y;
+			tmp = pdx * pdx + pdy * pdy;
+		}
+		return tmp - this.ray * this.ray < 0;
+	}
+	,collideCircle: function(c) {
+		throw haxe_Exception.thrown("Not implemented");
+	}
+	,collideBounds: function(b) {
+		throw haxe_Exception.thrown("Not implemented");
+	}
+	,__class__: h2d_col_RoundRect
+});
 var h2d_col_Segment = function(p1,p2) {
 	this.x = p1.x;
 	this.y = p1.y;
@@ -48334,6 +48635,24 @@ haxe_MainLoop.tick = function() {
 	}
 	return wait;
 };
+var haxe_Resource = function() { };
+$hxClasses["haxe.Resource"] = haxe_Resource;
+haxe_Resource.__name__ = "haxe.Resource";
+haxe_Resource.getBytes = function(name) {
+	var _g = 0;
+	var _g1 = haxe_Resource.content;
+	while(_g < _g1.length) {
+		var x = _g1[_g];
+		++_g;
+		if(x.name == name) {
+			if(x.str != null) {
+				return haxe_io_Bytes.ofString(x.str);
+			}
+			return haxe_crypto_Base64.decode(x.data);
+		}
+	}
+	return null;
+};
 var haxe_Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
@@ -63385,6 +63704,189 @@ hxd_fs_BytesFileSystem.prototype = {
 		throw haxe_Exception.thrown("Not implemented");
 	}
 	,__class__: hxd_fs_BytesFileSystem
+};
+var hxd_fs__$EmbedFileSystem_EmbedEntry = function(fs,name,relPath,data) {
+	this.fs = fs;
+	this.name = name;
+	this.relPath = relPath;
+	this.data = data;
+};
+$hxClasses["hxd.fs._EmbedFileSystem.EmbedEntry"] = hxd_fs__$EmbedFileSystem_EmbedEntry;
+hxd_fs__$EmbedFileSystem_EmbedEntry.__name__ = "hxd.fs._EmbedFileSystem.EmbedEntry";
+hxd_fs__$EmbedFileSystem_EmbedEntry.__super__ = hxd_fs_FileEntry;
+hxd_fs__$EmbedFileSystem_EmbedEntry.prototype = $extend(hxd_fs_FileEntry.prototype,{
+	init: function() {
+		if(this.bytes == null) {
+			this.bytes = haxe_Resource.getBytes(this.data);
+			if(this.bytes == null) {
+				throw haxe_Exception.thrown("Missing resource " + this.data);
+			}
+		}
+	}
+	,getBytes: function() {
+		if(this.bytes == null) {
+			this.init();
+		}
+		return this.bytes;
+	}
+	,readBytes: function(out,outPos,pos,len) {
+		if(this.bytes == null) {
+			this.init();
+		}
+		if(pos + len > this.bytes.length) {
+			len = this.bytes.length - pos;
+		}
+		if(len < 0) {
+			len = 0;
+		}
+		out.blit(outPos,this.bytes,pos,len);
+		return len;
+	}
+	,load: function(onReady) {
+		if(onReady != null) {
+			haxe_Timer.delay(onReady,1);
+		}
+	}
+	,loadBitmap: function(onLoaded) {
+		var rawData = null;
+		var _g = 0;
+		var _g1 = haxe_Resource.content;
+		while(_g < _g1.length) {
+			var res = _g1[_g];
+			++_g;
+			if(res.name == this.data) {
+				rawData = res.data;
+				break;
+			}
+		}
+		if(rawData == null) {
+			throw haxe_Exception.thrown("Missing resource " + this.data);
+		}
+		var image = new Image();
+		image.onload = function(_) {
+			onLoaded(image);
+		};
+		var extra = "";
+		var bytes = rawData.length * 6 >> 3;
+		var _g = 0;
+		var _g1 = (3 - bytes * 4 % 3) % 3;
+		while(_g < _g1) {
+			var i = _g++;
+			extra += "=";
+		}
+		var tmp = "data:image/" + this.get_extension() + ";base64," + rawData;
+		image.src = tmp + extra;
+	}
+	,get_isDirectory: function() {
+		return this.fs.isDirectory(this.relPath);
+	}
+	,get_path: function() {
+		if(this.relPath == ".") {
+			return "<root>";
+		} else {
+			return this.relPath;
+		}
+	}
+	,exists: function(name) {
+		return this.fs.exists(this.relPath == "." ? name : this.relPath + "/" + name);
+	}
+	,get: function(name) {
+		return this.fs.get(this.relPath == "." ? name : this.relPath + "/" + name);
+	}
+	,get_size: function() {
+		this.init();
+		return this.bytes.length;
+	}
+	,iterator: function() {
+		return new hxd_impl_ArrayIterator_$hxd_$fs_$FileEntry(this.fs.subFiles(this.relPath));
+	}
+	,__class__: hxd_fs__$EmbedFileSystem_EmbedEntry
+});
+var hxd_fs_EmbedFileSystem = function(root) {
+	this.root = root;
+};
+$hxClasses["hxd.fs.EmbedFileSystem"] = hxd_fs_EmbedFileSystem;
+hxd_fs_EmbedFileSystem.__name__ = "hxd.fs.EmbedFileSystem";
+hxd_fs_EmbedFileSystem.__interfaces__ = [hxd_fs_FileSystem];
+hxd_fs_EmbedFileSystem.resolve = function(path) {
+	return "R_" + path.replace(hxd_fs_EmbedFileSystem.invalidChars.r,"_");
+};
+hxd_fs_EmbedFileSystem.prototype = {
+	getRoot: function() {
+		return new hxd_fs__$EmbedFileSystem_EmbedEntry(this,"root",".",null);
+	}
+	,splitPath: function(path) {
+		if(path == ".") {
+			return [];
+		} else {
+			return path.split("/");
+		}
+	}
+	,subFiles: function(path) {
+		var r = this.root;
+		var _g = 0;
+		var _g1 = this.splitPath(path);
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			r = Reflect.field(r,p);
+		}
+		if(r == null) {
+			throw haxe_Exception.thrown(path + " is not a directory");
+		}
+		var fields = Reflect.fields(r);
+		fields.sort(Reflect.compare);
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < fields.length) {
+			var name = fields[_g1];
+			++_g1;
+			_g.push(this.get(path == "." ? name : path + "/" + name));
+		}
+		return _g;
+	}
+	,isDirectory: function(path) {
+		var r = this.root;
+		var _g = 0;
+		var _g1 = this.splitPath(path);
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			r = Reflect.field(r,p);
+		}
+		if(r != null) {
+			return r != true;
+		} else {
+			return false;
+		}
+	}
+	,exists: function(path) {
+		var r = this.root;
+		var _g = 0;
+		var _g1 = this.splitPath(path);
+		while(_g < _g1.length) {
+			var p = _g1[_g];
+			++_g;
+			r = Reflect.field(r,p);
+			if(r == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	,get: function(path) {
+		if(!this.exists(path)) {
+			throw haxe_Exception.thrown(new hxd_fs_NotFound(path));
+		}
+		var id = hxd_fs_EmbedFileSystem.resolve(path);
+		return new hxd_fs__$EmbedFileSystem_EmbedEntry(this,path.split("/").pop(),path,id);
+	}
+	,dispose: function() {
+	}
+	,dir: function(path) {
+		return this.subFiles(path);
+	}
+	,__class__: hxd_fs_EmbedFileSystem
 };
 var hxd_fs_FileInput = function(entry) {
 	this.nextReadPos = 0;
@@ -80895,6 +81397,7 @@ var Float = Number;
 var Bool = Boolean;
 var Class = { };
 var Enum = { };
+haxe_Resource.content = [{ name : "R_audios_audios_here_txt", data : ""},{ name : "R_locales_locales_here_txt", data : ""},{ name : "R_data_data_here_txt", data : ""},{ name : "R_images_hxlogo_png", data : "iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAABQVBMVEUAAAD6uxf6uxT7wxL7yBD7yBD7yBD7yBD7yBD6wRH4pRf2iB35yxz6shb6sxb6uRT7vhP7xBH7yBD7yBD7wxH5rRX3mBr1gx70cyHzayH54CHyYSL47yT6thfxViL5xRrvTCP51B7vSSP45CH47yT6vRL4qBb3kxv1fh/6vRL6uRT2jhz2jxv4mBz2hx/0dyH2iB/47yTvSSP47yTvSSPvSSPxVyLwTiP5xBr0ciH4rB/2iR/zbCH47yT4uB/4mR3zbiHxXSLvSSP47yT4px34nRzxXiLvTiP45CPwUiP40CHwVyLvSSP47yT4vB/vTSP45SPwVCPxWSLwTiP2jB7zcSHxYSL2jR7zbyDxXiLxXiL2iB/1fiD0diDxXiL2iB/1gCD4mRz2iR70eh/yaiH2iB/2iB/2iB/44SP4xiD3pR4rUKC+AAAAa3RSTlMAj7+/v58gEIC/v7+/////////7////////7//v////////////////++fgO//////n+8ggBDvgJ/vgP/fEO////9ggP///9/v////3+/////////vz///74AQQL//77///////89g37+/v+QKAKkAAAlfSURBVHgB7MGBAAAAAICg/akXqQIAAAAAAAAAAACAeamjZAaCMADCi5DAQEBiGAMA9z+fslX9LP7qf/sI30Nv0tb2zizU7t4wafPFLNT+weFgdVTK8cnp2TIQXNNQnS//38Xl1fVqtR6sbspYAMzj8qmAGquD1e1dIcCm53KpgKLmYd0XAszlEqiCUNQ9rIdCATC4MqmiULR+9LCeCkXA4EqjikNRFbGemVYQDK4kqjgUNROLaYXB4EqhikNRN7HGaRlgcPlUMSiWZWIxLQEMLp0qAEVVxWJaAhhcOlUAipqKxbQEMLh0qgAUdRWLaQlgcAlUAhTLMrGYlgIGl0sVgKLqYjEtCQwujQqoWM3FYloaGFwCFVDxuovFtBSwABdUMhTLcrGYlgAW4IJKhqIqYzEtBSzABZUKRc3HYlo+GFybU728AmXUfSym5YFtygUVUG/vHhTLkrGYlg8G1x9UQNlVG4tpZYLBRVBlQVHTsZhWGhhcBFUeFHUdi2klg8EFVTYUy3KxmFY2GFwjVSoUVR+LaU0B9ss1X3wk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"},{ name : "R_images_images_here_txt", data : ""}];
 haxe_MainLoop.add(hxd_System.updateCursor,-1);
 var hx__registerFont;
 hx__registerFont = function(name,data) {
@@ -80918,6 +81421,7 @@ js_Boot.__toStr = ({ }).toString;
 if(ArrayBuffer.prototype.slice == null) {
 	ArrayBuffer.prototype.slice = js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl;
 }
+Main.maxTime = 200;
 Xml.Element = 0;
 Xml.PCData = 1;
 Xml.CData = 2;
@@ -81376,6 +81880,7 @@ hxd_fmt_hmd_Position.QTMP = new h3d_Quat();
 hxd_fmt_hmd_Data.CURRENT_VERSION = 3;
 hxd_fmt_hmd_Reader.BLEND = h2d_BlendMode.__empty_constructs__.slice();
 hxd_fmt_hmd_Reader.CULLING = h3d_mat_Face.__empty_constructs__.slice();
+hxd_fs_EmbedFileSystem.invalidChars = new EReg("[^A-Za-z0-9_]","g");
 hxd_impl_BufferFlags.Dynamic = 0;
 hxd_impl_BufferFlags.Static = 1;
 hxd_impl_BufferFlags.UniformDynamic = 2;
