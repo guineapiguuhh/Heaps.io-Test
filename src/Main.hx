@@ -1,3 +1,6 @@
+import hxd.Res;
+import h2d.Object;
+import h2d.Bitmap;
 import h2d.Text;
 import hxd.res.DefaultFont;
 import hxd.App;
